@@ -1,0 +1,72 @@
+FROM php:7.4-fpm
+#-prod
+#FROM bitnami/php-fpm:7.4.6
+#RUN install_packages build-essential autoconf ca-certificates pkg-config \
+#    libmemcached-dev libmemcached11 libmemcachedutil2 libhashkit2
+
+RUN apt-get update
+RUN apt-get install -y apt-utils
+
+# Add NodeJS LTS Repository
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
+
+# Optional XDebug Install
+#RUN curl -fsSL 'https://xdebug.org/files/xdebug-2.9.4.tgz' -o xdebug.tar.gz \
+#    && mkdir -p xdebug \
+#    && tar -xf xdebug.tar.gz -C xdebug --strip-components=1 \
+#    && rm xdebug.tar.gz \
+#    && ( \
+#    cd xdebug \
+#    && phpize \
+#    && ./configure --enable-xdebug \
+#    && make -j$(nproc) \
+#    && make install \
+#    ) \
+#    && rm -r xdebug \
+#    && docker-php-ext-enable xdebug   
+
+RUN apt-get install -y \
+    autoconf \
+    libmcrypt-dev \
+    libc-client-dev \
+    libicu-dev \
+    libkrb5-dev \
+    libssl-dev \
+    libxslt1-dev \
+    libxml2-dev \
+    locales \
+    zlib1g-dev \
+    libzip-dev\
+    libpng-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libjpeg-dev \
+    zip \
+    nodejs
+
+#RUN apt-get install autoconf 
+#build-essential libtool  unzip wget
+RUN export PHP_AUTOCONF=/usr/bin/autoconf
+
+
+# We are going to use PECL to install xDebug, as well as some additional extensions.
+RUN pecl install  xdebug-2.9.4 mcrypt-1.0.3  igbinary
+#xdebug-2.9.4
+# Copy the built extensions. I suppose this is the clever bit. Taking the production container and copying binaries
+# from the builder container. No build tools, no temp/junk/artefacts. Just the required binaries. Just one of the
+# very useful uses of multi-stage builds.
+#COPY --from=builder \
+#    /opt/bitnami/php/lib/php/extensions/xdebug.so \
+#    /opt/bitnami/php/lib/php/extensions/
+
+RUN  echo "extension=mcrypt.so" > /usr/local/etc/php/conf.d/mcrypt.ini
+
+# COMPOSER INSTALL
+RUN curl -sSfo /tmp/composer.phar https://getcomposer.org/installer
+RUN php /tmp/composer.phar --install-dir=/usr/local/bin --filename=composer
+
+# Install and configure PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-install -j$(nproc) pdo pdo_mysql \
+    && docker-php-ext-install -j$(nproc) zip

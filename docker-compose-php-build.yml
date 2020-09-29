@@ -1,0 +1,12 @@
+version: "3.2"
+services:
+  app:
+    image: ssnukala/uf44php:4.4.3.01
+    restart: unless-stopped
+    tty: true
+    build:
+      context: .
+      dockerfile: docker-app/Dockerfile
+    volumes:
+      - ./docker-app/php/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+      - ~/.composer/docker-cache/:/root/.composer:cached

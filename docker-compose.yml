@@ -1,7 +1,7 @@
-version: "3.2"
+version: '3.2'
 services:
   app:
-    image: ssnukala/uf44php:4.4.3.01
+    image: ssnukala/uf4xphp:4.5.0.01
     restart: unless-stopped
     tty: true
     build:

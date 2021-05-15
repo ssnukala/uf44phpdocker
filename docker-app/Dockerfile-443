@@ -1,4 +1,8 @@
 FROM php:7.4-fpm
+#-prod
+#FROM bitnami/php-fpm:7.4.6
+#RUN install_packages build-essential autoconf ca-certificates pkg-config \
+#    libmemcached-dev libmemcached11 libmemcachedutil2 libhashkit2
 
 RUN apt-get update
 RUN apt-get install -y apt-utils
@@ -19,7 +23,7 @@ RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
 #    && make install \
 #    ) \
 #    && rm -r xdebug \
-#    && docker-php-ext-enable xdebug
+#    && docker-php-ext-enable xdebug   
 
 RUN apt-get install -y \
     autoconf \
@@ -44,9 +48,9 @@ RUN apt-get install -y \
 #build-essential libtool  unzip wget
 RUN export PHP_AUTOCONF=/usr/bin/autoconf
 
+
 # We are going to use PECL to install xDebug, as well as some additional extensions.
-#RUN pecl install  xdebug-2.9.4 mcrypt-1.0.3  igbinary
-RUN pecl install  mcrypt-1.0.3  igbinary
+RUN pecl install  xdebug-2.9.4 mcrypt-1.0.3  igbinary
 #xdebug-2.9.4
 # Copy the built extensions. I suppose this is the clever bit. Taking the production container and copying binaries
 # from the builder container. No build tools, no temp/junk/artefacts. Just the required binaries. Just one of the
